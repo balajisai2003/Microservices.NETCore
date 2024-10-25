@@ -28,8 +28,7 @@ namespace Mango.Web.Service
                 message.Content = new StringContent(JsonConvert.SerializeObject(requestDTO.Data), Encoding.UTF8, "application/json");
             }
 
-
-
+            HttpResponseMessage? apiResponse = null;
             switch (requestDTO.ApiType)
             {
                 case ApiType.POST:
@@ -48,7 +47,17 @@ namespace Mango.Web.Service
                     break;
             }
 
-            HttpResponseMessage? apiResponse = await client.SendAsync(message);
+
+            try
+            {
+                apiResponse = await client.SendAsync(message);
+            }
+            catch (HttpRequestException httpEx)
+            {
+                // Handle specific HTTP exceptions here (e.g., logging)
+                return new ResponseDTO { Message = httpEx.Message, IsSuccess = false };
+            }
+
 
             try
             {

@@ -4,11 +4,12 @@ using Mango.Services.CouponAPI.Models;
 using Mango.Services.CouponAPI.Models.DTO;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using static Azure.Core.HttpHeader;
 
 namespace Mango.Services.CouponAPI.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/coupon")]
     [ApiController]
     public class CouponController : ControllerBase
     {
@@ -24,11 +25,11 @@ namespace Mango.Services.CouponAPI.Controllers
         }
 
         [HttpGet]
-        public ResponseDTO Get()
+        public async Task<ResponseDTO> Get()
         {
             try
             {
-                IEnumerable<Coupon> coupons = _appDbContext.Coupons.ToList();
+                IEnumerable<Coupon> coupons = await _appDbContext.Coupons.ToListAsync();
                 if (coupons == null)
                 {
                     _response.IsSuccess = false;
@@ -87,6 +88,7 @@ namespace Mango.Services.CouponAPI.Controllers
         }
 
         [HttpPost]
+        [Route("Create")]
         public ResponseDTO Post([FromBody] CouponDTO couponDTO)
         {
             try
@@ -107,6 +109,7 @@ namespace Mango.Services.CouponAPI.Controllers
         }
 
         [HttpPut]
+        [Route("Update")]
         public ResponseDTO Put([FromBody] CouponDTO couponDTO)
         {
             try
@@ -127,7 +130,7 @@ namespace Mango.Services.CouponAPI.Controllers
         }
 
         [HttpDelete]
-        [Route("{id:int}")]
+        [Route("Delete/{id:int}")]
         public ResponseDTO Delete(int id)
         {
             try
