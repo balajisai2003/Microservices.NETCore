@@ -50,9 +50,13 @@
                                 @item.MinAmount
                             </td>
                             <td>
-                                <a class="btn btn-danger">
+							<a class="btn btn-danger" asp-controller="Coupon" asp-action="DeleteCoupon" asp-route-id="@item.CouponId">
                                     <i class="bi bi-trash"></i>
                                 </a>
+
+							<a class="btn btn-danger" asp-controller="Coupon" asp-action="UpdateCoupon" asp-route-id="@item.CouponId">
+								<i class="bi bi-pencil-fill"></i>
+							</a>
                             </td>
                         </tr>
                     }

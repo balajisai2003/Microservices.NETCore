@@ -108,7 +108,7 @@ namespace Mango.Services.CouponAPI.Controllers
 
         }
 
-        [HttpPut]
+        [HttpPost]
         [Route("Update")]
         public ResponseDTO Put([FromBody] CouponDTO couponDTO)
         {

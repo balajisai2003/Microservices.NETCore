@@ -29,7 +29,7 @@ namespace Mango.Web.Service
             return await _baseService.SendAsync(new RequestDTO 
             { 
                 ApiType = SD.ApiType.DELETE, 
-                Url = SD.CouponAPIBase + "/api/coupon/Delete", 
+                Url = SD.CouponAPIBase + "/api/coupon/Delete/"+id, 
                 AccessToken = "" 
             });
         }
@@ -70,7 +70,7 @@ namespace Mango.Web.Service
             return await _baseService.SendAsync(new RequestDTO 
             {
                 Data = couponDTO,
-                ApiType = SD.ApiType.GET, 
+                ApiType = SD.ApiType.POST, 
                 Url = SD.CouponAPIBase + "/api/coupon/Update", 
                 AccessToken = "" 
             });
