@@ -12,12 +12,14 @@ namespace Mango.Services.AuthAPI.Services
         private readonly AppDbContext _appDbContext;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly IJWTTokenGenerator _jWTTokenGenerator;
 
-        public AuthService(AppDbContext appDbContext, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
+        public AuthService(AppDbContext appDbContext, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, IJWTTokenGenerator jWTTokenGenerator)
         {
             _appDbContext = appDbContext;
             _userManager = userManager;
             _roleManager = roleManager;
+            _jWTTokenGenerator = jWTTokenGenerator;
         }
         public async Task<LoginResponseDTO> Login(LoginRequestDTO loginRequestDTO)
         {
@@ -38,7 +40,7 @@ namespace Mango.Services.AuthAPI.Services
             LoginResponseDTO loginResponseDTO = new LoginResponseDTO()
             {
                 User = userDTO,
-                Token = ""
+                Token = _jWTTokenGenerator.GenerateToken(user)
             };
 
             return loginResponseDTO;
