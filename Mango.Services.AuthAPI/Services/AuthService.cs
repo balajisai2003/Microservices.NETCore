@@ -19,12 +19,32 @@ namespace Mango.Services.AuthAPI.Services
             _userManager = userManager;
             _roleManager = roleManager;
         }
-        public Task<LoginResponseDTO> Login(LoginRequestDTO loginRequestDTO)
+        public async Task<LoginResponseDTO> Login(LoginRequestDTO loginRequestDTO)
         {
-            throw new NotImplementedException();
+
+            ApplicationUser? user = await _appDbContext.ApplicationUsers.FirstOrDefaultAsync(u => u.UserName.ToLower() == loginRequestDTO.UserName.ToLower());
+            bool isValid = user != null && await _userManager.CheckPasswordAsync(user, loginRequestDTO.Password);
+            if (!isValid)
+            {
+                return new LoginResponseDTO() { User = null, Token=""};
+            }
+            UserDTO userDTO = new UserDTO()
+            {
+                ID = user.Id,
+                Email = user.Email,
+                Name = user.Name,
+                PhoneNumber = user.PhoneNumber
+            };
+            LoginResponseDTO loginResponseDTO = new LoginResponseDTO()
+            {
+                User = userDTO,
+                Token = ""
+            };
+
+            return loginResponseDTO;
         }
 
-        public async Task<UserDTO> Register(RegistrationRequestDTO registrationRequestDTO)
+        public async Task<string> Register(RegistrationRequestDTO registrationRequestDTO)
         {
             ApplicationUser user = new()
             {
@@ -40,20 +60,18 @@ namespace Mango.Services.AuthAPI.Services
                 var result = await _userManager.CreateAsync(user, registrationRequestDTO.Password);
                 if (result.Succeeded)
                 {
-                    var userToReturn = await _appDbContext.ApplicationUsers.FirstOrDefaultAsync(u => u.UserName == registrationRequestDTO.Email);
-                    return new UserDTO()
-                    {
-                        Name = userToReturn.Name,
-                        Email = userToReturn.Email,
-                        PhoneNumber = userToReturn.PhoneNumber,
-                    };
+                    await _appDbContext.ApplicationUsers.FirstOrDefaultAsync(u => u.UserName == registrationRequestDTO.Email);
+                    return "User created successfully";
+                }
+                else
+                {
+                    return result.Errors.FirstOrDefault().Description;
                 }
             }
             catch (Exception ex)
             {
-                throw;
+                return "Error Encountered\n"+ex.Message;
             }
-            return new UserDTO();
         }
     }
 }

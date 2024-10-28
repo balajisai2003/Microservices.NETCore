@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Mango.Services.AuthAPI.Models.DTO;
+using Mango.Services.AuthAPI.Services.IServices;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Mango.Services.AuthAPI.Controllers
@@ -7,16 +9,43 @@ namespace Mango.Services.AuthAPI.Controllers
     [ApiController]
     public class AuthAPIController : ControllerBase
     {
-        [HttpPost("Register")]
-        public async Task<IActionResult> Register()
+        private readonly IAuthService _authService;
+        private readonly ResponseDTO _responseDTO;
+
+
+        public AuthAPIController(IAuthService authService)
         {
-            return Ok();
+            _authService = authService;
+            _responseDTO = new ResponseDTO();
+        }
+
+        [HttpPost("Register")]
+        public async Task<IActionResult> Register([FromBody] RegistrationRequestDTO registrationRequestDTO)
+        {
+            var errorMessage = await _authService.Register(registrationRequestDTO);
+
+            _responseDTO.Message = errorMessage;
+            if (!string.IsNullOrEmpty(errorMessage) && errorMessage != "User created successfully")
+            {
+                _responseDTO.IsSuccess = false;
+                return BadRequest(_responseDTO);
+
+            }
+            return Ok(_responseDTO);
         }
 
         [HttpPost("Login")]
-        public async Task<IActionResult> Login()
+        public async Task<IActionResult> Login([FromBody] LoginRequestDTO loginRequestDTO)
         {
-            return Ok();
+            LoginResponseDTO loginResponseDTO = await _authService.Login(loginRequestDTO);
+            if (loginResponseDTO.User == null)
+            {
+                _responseDTO.IsSuccess = false;
+                _responseDTO.Message = "Login Failed";
+                return Unauthorized(_responseDTO);
+            }
+            _responseDTO.Result = loginResponseDTO;
+            return Ok(_responseDTO);
         }
     }
 }
