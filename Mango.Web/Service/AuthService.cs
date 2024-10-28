@@ -6,9 +6,9 @@ namespace Mango.Web.Service
 {
     public class AuthService : IAuthService
     {
-        private readonly BaseService _baseService;
+        private readonly IBaseService _baseService;
 
-        public AuthService(BaseService baseService)
+        public AuthService(IBaseService baseService)
         {
             _baseService = baseService;
         }
@@ -19,7 +19,7 @@ namespace Mango.Web.Service
             {
                 Data = registrationRequestDTO,
                 ApiType = SD.ApiType.POST,
-                Url = SD.CouponAPIBase + "/api/Auth/AssignRole",
+                Url = SD.AuthAPIBase + "/api/Auth/AssignRole",
                 AccessToken = "",
             });
         }
@@ -29,7 +29,7 @@ namespace Mango.Web.Service
             {
                 Data = loginRequestDTO,
                 ApiType = SD.ApiType.POST,
-                Url = SD.CouponAPIBase + "/api/Auth/Login",
+                Url = SD.AuthAPIBase + "/api/Auth/Login",
                 AccessToken = "",
             });
         }
@@ -39,7 +39,7 @@ namespace Mango.Web.Service
             {
                 Data = registrationRequestDTO,
                 ApiType = SD.ApiType.POST,
-                Url = SD.CouponAPIBase + "/api/Auth/Register",
+                Url = SD.AuthAPIBase + "/api/Auth/Register",
                 AccessToken = "",
             });
         }

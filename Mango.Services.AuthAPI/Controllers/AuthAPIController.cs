@@ -35,14 +35,14 @@ namespace Mango.Services.AuthAPI.Controllers
         }
 
         [HttpPost("Login")]
-        public async Task<IActionResult> Login([FromBody] LoginRequestDTO loginRequestDTO)
+        public async Task<ActionResult<ResponseDTO>> Login([FromBody] LoginRequestDTO loginRequestDTO)
         {
             LoginResponseDTO loginResponseDTO = await _authService.Login(loginRequestDTO);
             if (loginResponseDTO.User == null)
             {
                 _responseDTO.IsSuccess = false;
                 _responseDTO.Message = "Login Failed";
-                return Unauthorized(_responseDTO);
+                return _responseDTO;
             }
             _responseDTO.Result = loginResponseDTO;
             return Ok(_responseDTO);
