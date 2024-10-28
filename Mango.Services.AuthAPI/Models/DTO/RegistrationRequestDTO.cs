@@ -14,6 +14,10 @@ namespace Mango.Services.AuthAPI.Models.DTO
         public string PhoneNumber { get; set; }
         [Required]
         [DataType(DataType.Password)]
-        public string Password { get; set; }
+        public string? Password { get; set; }
+        [Required]
+        public string? Role { get; set; }
+
+
     }
 }
