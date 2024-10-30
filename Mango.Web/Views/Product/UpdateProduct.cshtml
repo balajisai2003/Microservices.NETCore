@@ -1,0 +1,71 @@
+﻿@model ProductDTO
+
+<form asp-controller="Product" asp-action="UpdateProduct" method="post">
+    <br />
+    <div class="container border p-3">
+        <h1 class="text-center">Update Product</h1>
+        <input asp-for="ProductID" hidden />
+        <hr />
+        <div class="row">
+            <div class="col-2">
+                <label class="control-label pt-2" style="font-size:17px;">Product Name</label>
+            </div>
+            <div class="col-10 pb-3">
+                <input class="form-control" asp-for="ProductName" />
+                <span asp-validation-for="ProductName" class="text-danger"></span>
+            </div>
+            <div class="col-2">
+                <label class="control-label pt-2" style="font-size:17px;">Category Name</label>
+            </div>
+            <div class="col-10 pb-3">
+                <input class="form-control" asp-for="CategoryName" />
+                <span asp-validation-for="CategoryName" class="text-danger"></span>
+
+            </div>
+            <div class="col-2">
+                <label class="control-label pt-2" style="font-size:17px;">Price</label>
+            </div>
+            <div class="col-10 pb-3">
+                <input class="form-control" asp-for="Price" />
+                <span asp-validation-for="Price" class="text-danger"></span>
+
+            </div>
+
+            <div class="col-2">
+                <label class="control-label pt-2" style="font-size:17px;">Description</label>
+            </div>
+            <div class="col-10 pb-3">
+                <textarea class="form-control" asp-for="Description" rows="5"></textarea>
+                <span asp-validation-for="Description" class="text-danger"></span>
+
+            </div>
+
+            <div class="col-2">
+                <label class="control-label pt-2" style="font-size:17px;">URL</label>
+            </div>
+            <div class="col-10 pb-3">
+                <input class="form-control" asp-for="ImageUrl" />
+                <span asp-validation-for="ImageUrl" class="text-danger"></span>
+
+            </div>
+
+            <div class="col-5 offset-2">
+
+                <a class="btn-primary btn form-control" asp-controller="Product" asp-action="ProductIndex">Back to List</a>
+            </div>
+            <div class="col-5">
+
+                <button type="submit" class="btn btn-success form-control">Update Product</button>
+
+            </div>
+
+        </div>
+
+        <div>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -11,15 +11,18 @@ namespace Mango.Services.AuthAPI.Services
     {
         private readonly AppDbContext _appDbContext;
         private readonly UserManager<ApplicationUser> _userManager;
+
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IJWTTokenGenerator _jWTTokenGenerator;
+        private readonly SignInManager<ApplicationUser> _signInManager;
 
-        public AuthService(AppDbContext appDbContext, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, IJWTTokenGenerator jWTTokenGenerator)
+        public AuthService(AppDbContext appDbContext, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, IJWTTokenGenerator jWTTokenGenerator,SignInManager<ApplicationUser> signInManager )
         {
             _appDbContext = appDbContext;
             _userManager = userManager;
             _roleManager = roleManager;
             _jWTTokenGenerator = jWTTokenGenerator;
+            _signInManager = signInManager;
         }
 
         public async Task<bool> AssignRole(string email, string roleName)
@@ -41,7 +44,10 @@ namespace Mango.Services.AuthAPI.Services
         {
 
             ApplicationUser? user = await _appDbContext.ApplicationUsers.FirstOrDefaultAsync(u => u.UserName.ToLower() == loginRequestDTO.UserName.ToLower());
-            bool isValid = user != null && await _userManager.CheckPasswordAsync(user, loginRequestDTO.Password);
+            bool isValid = user != null && await _signInManager.PasswordSignInAsync(user, loginRequestDTO.Password, false, false) != null;
+            var roles = await _userManager.GetRolesAsync(user);
+            var token = _jWTTokenGenerator.GenerateToken(user, roles);
+
             if (!isValid)
             {
                 return new LoginResponseDTO() { User = null, Token=""};
@@ -56,7 +62,7 @@ namespace Mango.Services.AuthAPI.Services
             LoginResponseDTO loginResponseDTO = new LoginResponseDTO()
             {
                 User = userDTO,
-                Token = _jWTTokenGenerator.GenerateToken(user)
+                Token = token
             };
 
             return loginResponseDTO;
