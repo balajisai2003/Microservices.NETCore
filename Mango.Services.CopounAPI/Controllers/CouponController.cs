@@ -27,6 +27,7 @@ namespace Mango.Services.CouponAPI.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public async Task<ResponseDTO> Get()
         {
             try
@@ -48,6 +49,8 @@ namespace Mango.Services.CouponAPI.Controllers
 
         [HttpGet]
         [Route("GetById/{id:int}")]
+        [AllowAnonymous]
+
         public object Get(int id)
         {
             try
@@ -69,6 +72,7 @@ namespace Mango.Services.CouponAPI.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         [Route("GetByCode/{code}")]
         public object Get(string code)
         {

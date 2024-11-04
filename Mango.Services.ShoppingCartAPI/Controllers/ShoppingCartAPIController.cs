@@ -2,6 +2,7 @@
 using Mango.Services.ShoppingCartAPI.Data;
 using Mango.Services.ShoppingCartAPI.Models;
 using Mango.Services.ShoppingCartAPI.Models.DTO;
+using Mango.Services.ShoppingCartAPI.Service.IService;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -16,11 +17,16 @@ namespace Mango.Services.ShoppingCartAPI.Controllers
         private readonly IMapper _mapper;
         private readonly AppDbContext _appDbContext;
         private readonly ResponseDTO _response;
+        private readonly IProductService _productService;
+        private readonly ICouponService _couponService;
 
-        public ShoppingCartAPIController(IMapper mapper, AppDbContext appDbContext)
+
+        public ShoppingCartAPIController(IMapper mapper, AppDbContext appDbContext, IProductService productService, ICouponService couponService)
         {
             _mapper = mapper;
             _appDbContext = appDbContext;
+            _productService = productService;
+            _couponService = couponService;
             _response = new ResponseDTO();
         }
 
@@ -37,11 +43,75 @@ namespace Mango.Services.ShoppingCartAPI.Controllers
                     CartHeader = _mapper.Map<CartHeaderDTO>(cartHeader),
                 };
                 cart.CartDetails = _mapper.Map<IEnumerable<CartDetailsDTO>>(cartDetails);
-                foreach(var detail in cart.CartDetails)
+                IEnumerable<ProductDTO> productDTOs = await _productService.GetProducts();
+                foreach (var detail in cart.CartDetails)
                 {
+                    foreach(var product in productDTOs)
+                    {
+                        if (product.ProductID == detail.ProductId)
+                        {
+                            detail.product = product;
+                            break;
+                        }
+                    }
                     cart.CartHeader.CartTotal += detail.product.Price * detail.Quantity;
                 }
+                if (!string.IsNullOrEmpty(cart.CartHeader.CouponCode))
+                {
+                    CouponDTO coupon = await _couponService.GetCoupon(cart.CartHeader.CouponCode);
+                    if(coupon != null && cart.CartHeader.CartTotal>coupon.MinAmount)
+                    {
+                        cart.CartHeader.CartTotal -= coupon.DiscountAmount;
+                        cart.CartHeader.Discount = coupon.DiscountAmount;
+                    }
+                    else
+                    {
+                        _response.Message = "Coupon is valid but cart total is less than minimum amount";
+                    }
+                }
+                _response.Result = cart;
 
+            }
+            catch (Exception ex)
+            {
+                _response.IsSuccess = false;
+                _response.Message = ex.Message.ToString();
+            }
+            return _response;
+        }
+
+
+        [HttpPost("ApplyCoupon")]
+        public async Task<object> ApplyCoupon([FromBody] CartDTO cartDTO)
+        {
+            try
+            {
+                var cartHeaderFromDb = await _appDbContext.CartHeaders.FirstOrDefaultAsync(u => u.UserId == cartDTO.CartHeader.UserId);
+                cartHeaderFromDb.CouponCode = cartDTO.CartHeader.CouponCode;
+                _appDbContext.Update(cartHeaderFromDb);
+                await _appDbContext.SaveChangesAsync();
+                _response.Result = true;
+                _response.Message = "Coupon applied successfully";
+            }
+            catch (Exception ex)
+            {
+                _response.IsSuccess = false;
+                _response.Message = ex.Message.ToString();
+            }
+            return _response;
+        }
+
+        [HttpPost("RemoveCoupon")]
+        public async Task<object> RemoveCoupon([FromBody] CartDTO cartDTO)
+        {
+            try
+            {
+                var cartHeaderFromDb = await _appDbContext.CartHeaders.FirstOrDefaultAsync(u => u.UserId == cartDTO.CartHeader.UserId);
+                cartHeaderFromDb.CouponCode = "";
+                _appDbContext.Update(cartHeaderFromDb);
+                await _appDbContext.SaveChangesAsync();
+                _response.Result = true;
+                _response.Message = "Coupon removed successfully";
             }
             catch (Exception ex)
             {
