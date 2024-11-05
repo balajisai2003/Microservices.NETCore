@@ -1,7 +1,15 @@
 ﻿@model ProductDTO
 
 
-<form asp-action="" asp-controller="Home" method="post">
+<form asp-action="ProductDetails" asp-controller="Home" method="post">
+    <input type="hidden" asp-for="ProductID" />
+    <input type="hidden" asp-for="ProductName" />
+    <input type="hidden" asp-for="Price" />
+    <input type="hidden" asp-for="CategoryName" />
+    <input type="hidden" asp-for="Description" />
+    <input type="hidden" asp-for="ImageUrl" />
+
+
     <div class=" pt-4">
         <div class="card container" style="border:1px solid #808080;">
             <div class="card-header bg-dark text-light row" style="border-radius: 0px;">

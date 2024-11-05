@@ -35,6 +35,7 @@ namespace Mango.Web.Service
                 message.Content = new StringContent(JsonConvert.SerializeObject(requestDTO.Data), Encoding.UTF8, "application/json");
             }
 
+            
             HttpResponseMessage? apiResponse = null;
             switch (requestDTO.ApiType)
             {

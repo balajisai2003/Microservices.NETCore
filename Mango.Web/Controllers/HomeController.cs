@@ -1,8 +1,10 @@
 using Mango.Web.Models;
 using Mango.Web.Service.IService;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using System.Diagnostics;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace Mango.Web.Controllers
 {
@@ -10,12 +12,14 @@ namespace Mango.Web.Controllers
     {
         private readonly ILogger<HomeController> _logger;
 		private readonly IProductService _productService;
+        private readonly IShoppingCartService _shoppingCartService;
 
-		public HomeController(ILogger<HomeController> logger, IProductService productService)
+		public HomeController(ILogger<HomeController> logger, IProductService productService, IShoppingCartService shoppingCartService)
         {
             _logger = logger;
 			_productService = productService;
-		}
+            _shoppingCartService = shoppingCartService;
+        }
 
         public async Task<IActionResult> Index()
         {
@@ -43,6 +47,7 @@ namespace Mango.Web.Controllers
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
 
+        [HttpGet]
         public async Task<IActionResult> ProductDetails(int productId)
         {
             var response = await _productService.GetProductByIdAsync(productId);
@@ -54,6 +59,43 @@ namespace Mango.Web.Controllers
             TempData["error"] = response.Message;
 
             return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        [Authorize]
+        [ActionName("ProductDetails")]
+        public async Task<IActionResult> ProductDetails(ProductDTO productDTO)
+        {
+            CartDTO cartDTO = new CartDTO()
+            {
+                CartHeader = new CartHeaderDTO()
+                {
+                    UserId = User.Claims.Where(u => u.Type == JwtRegisteredClaimNames.Sub).FirstOrDefault()?.Value
+                }
+            };
+
+
+            CartDetailsDTO cartDetails = new CartDetailsDTO()
+            {
+                Quantity = productDTO.Quantity,
+                ProductId = productDTO.ProductID,
+                product = productDTO
+
+            };
+            List<CartDetailsDTO> cartDetailsDTOs = new List<CartDetailsDTO>();
+            cartDetailsDTOs.Add(cartDetails);
+            cartDTO.CartDetails = cartDetailsDTOs;
+
+            var response = await _shoppingCartService.UpsertCartAsync(cartDTO);
+            if (response != null && response.IsSuccess)
+            {
+                TempData["success"] = response.Message;
+
+                return RedirectToAction(nameof(Index));
+            }
+            TempData["error"] = response.Message;
+
+            return View(productDTO);
         }
     }
 }

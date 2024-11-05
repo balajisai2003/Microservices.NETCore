@@ -27,7 +27,7 @@ namespace Mango.Services.CouponAPI.Controllers
         }
 
         [HttpGet]
-        [AllowAnonymous]
+        //[AllowAnonymous]
         public async Task<ResponseDTO> Get()
         {
             try
@@ -72,7 +72,7 @@ namespace Mango.Services.CouponAPI.Controllers
         }
 
         [HttpGet]
-        [AllowAnonymous]
+        //[AllowAnonymous]
         [Route("GetByCode/{code}")]
         public object Get(string code)
         {

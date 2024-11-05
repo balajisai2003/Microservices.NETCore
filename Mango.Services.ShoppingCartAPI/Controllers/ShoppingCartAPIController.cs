@@ -3,6 +3,7 @@ using Mango.Services.ShoppingCartAPI.Data;
 using Mango.Services.ShoppingCartAPI.Models;
 using Mango.Services.ShoppingCartAPI.Models.DTO;
 using Mango.Services.ShoppingCartAPI.Service.IService;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -10,8 +11,9 @@ using System.Reflection.PortableExecutable;
 
 namespace Mango.Services.ShoppingCartAPI.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/cart")]
     [ApiController]
+    [Authorize]
     public class ShoppingCartAPIController : ControllerBase
     {
         private readonly IMapper _mapper;
@@ -76,18 +78,19 @@ namespace Mango.Services.ShoppingCartAPI.Controllers
             {
                 _response.IsSuccess = false;
                 _response.Message = ex.Message.ToString();
+                _response.Result = null;
             }
             return _response;
         }
 
 
         [HttpPost("ApplyCoupon")]
-        public async Task<object> ApplyCoupon([FromBody] CartDTO cartDTO)
+        public async Task<object> ApplyCoupon([FromBody] CartHeaderDTO cartHeader)
         {
             try
             {
-                var cartHeaderFromDb = await _appDbContext.CartHeaders.FirstOrDefaultAsync(u => u.UserId == cartDTO.CartHeader.UserId);
-                cartHeaderFromDb.CouponCode = cartDTO.CartHeader.CouponCode;
+                var cartHeaderFromDb = await _appDbContext.CartHeaders.FirstOrDefaultAsync(u => u.UserId == cartHeader.UserId);
+                cartHeaderFromDb.CouponCode = cartHeader.CouponCode;
                 _appDbContext.Update(cartHeaderFromDb);
                 await _appDbContext.SaveChangesAsync();
                 _response.Result = true;
@@ -122,9 +125,11 @@ namespace Mango.Services.ShoppingCartAPI.Controllers
         }
 
 
-        [HttpPost("CartUpsert")]
-        public async Task<ResponseDTO> CartUpsert(CartDTO cartDTO)
+        [HttpPost]
+        [Route("CartUpsert")]
+        public async Task<ResponseDTO> CartUpsert([FromBody] CartDTO cartDTO)
         {
+
             try
             {
                 var cartHeaderFromDb = await _appDbContext.CartHeaders
