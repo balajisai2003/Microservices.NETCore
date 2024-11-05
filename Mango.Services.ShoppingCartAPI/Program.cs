@@ -1,5 +1,5 @@
 using AutoMapper;
-using Mango.MessageBus;
+using Mango.AzureServiceBus;
 using Mango.Services.ShoppingCartAPI;
 using Mango.Services.ShoppingCartAPI.Data;
 using Mango.Services.ShoppingCartAPI.Extensions;
@@ -9,7 +9,6 @@ using Mango.Services.ShoppingCartAPI.Utils;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
-using Mongo.ServiceBus;
 using System.Security.Cryptography.Xml;
 
 var builder = WebApplication.CreateBuilder(args);
