@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Mango.MessageBus;
 using Mango.Services.ShoppingCartAPI.Data;
 using Mango.Services.ShoppingCartAPI.Models;
 using Mango.Services.ShoppingCartAPI.Models.DTO;
@@ -21,14 +22,18 @@ namespace Mango.Services.ShoppingCartAPI.Controllers
         private readonly ResponseDTO _response;
         private readonly IProductService _productService;
         private readonly ICouponService _couponService;
+        private readonly IMessageBus _messageBus;
+        private readonly IConfiguration _configuration;
 
 
-        public ShoppingCartAPIController(IMapper mapper, AppDbContext appDbContext, IProductService productService, ICouponService couponService)
+        public ShoppingCartAPIController(IMapper mapper, AppDbContext appDbContext, IProductService productService, ICouponService couponService, IMessageBus messageBus, IConfiguration configuration)
         {
             _mapper = mapper;
             _appDbContext = appDbContext;
             _productService = productService;
             _couponService = couponService;
+            _messageBus = messageBus;
+            _configuration = configuration;
             _response = new ResponseDTO();
         }
 
@@ -95,6 +100,24 @@ namespace Mango.Services.ShoppingCartAPI.Controllers
                 await _appDbContext.SaveChangesAsync();
                 _response.Result = true;
                 _response.Message = "Coupon applied successfully";
+            }
+            catch (Exception ex)
+            {
+                _response.IsSuccess = false;
+                _response.Message = ex.Message.ToString();
+            }
+            return _response;
+        }
+
+        [HttpPost("EmailCartReq")]
+        public async Task<object> EmailCartReq([FromBody] CartDTO cartDTO)
+        {
+            try
+            {
+                await _messageBus.PublishMessage(cartDTO, _configuration.GetValue<string>("TopicAndQueueNames:EmailShoppingCart"));
+
+                _response.Result = true;
+                _response.Message = "Email will be processed and sent shortly.";
             }
             catch (Exception ex)
             {

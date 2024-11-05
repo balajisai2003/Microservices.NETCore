@@ -19,4 +19,9 @@
 	  <PackageReference Include="Swashbuckle.AspNetCore" Version="6.9.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Mango.MessageBud\Mango.MessageBus.csproj" />
+    <ProjectReference Include="..\Mongo.ServiceBus\Mongo.ServiceBus.csproj" />
+  </ItemGroup>
+
 </Project>

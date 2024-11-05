@@ -2,8 +2,8 @@
 
 @if(Model.CartHeader !=null && Model.CartDetails?.Count() > 0)
 {
-    
-    <form method="post">
+
+    <form method="post" asp-action="EmailCart" asp-controller="Cart">
         <input type="hidden" asp-for="CartHeader.UserId" />
         <input type="hidden" asp-for="CartHeader.CartHeaderId" />
         <br />

@@ -48,6 +48,21 @@ namespace Mango.Web.Controllers
             return View();
         }
 
+        public async Task<IActionResult> EmailCart()
+        {
+            CartDTO cartDTO = await LoadCartBasedOnLoggedUser();
+            cartDTO.CartHeader.Email = User.Claims.Where(u => u.Type == JwtRegisteredClaimNames.Email)?.FirstOrDefault()?.Value;
+            var response = await _shoppingCartService.EmialCart(cartDTO);
+            if (response != null && response.IsSuccess)
+            {
+                TempData["success"] = response.Message;
+                return RedirectToAction(nameof(CartIndex));
+            }
+            TempData["error"] = response?.Message;
+            return View();
+        }
+
+
         public async Task<IActionResult> RemoveFromCart(int cartDetailsId)
         {
             var userId = User.Claims.Where(u => u.Type == JwtRegisteredClaimNames.Sub).FirstOrDefault()?.Value;
